@@ -1,0 +1,551 @@
+<HTML>
+<HEAD>
+    <TITLE>weather</TITLE>
+    <style type="text/css">
+        #main{
+            width: 700px;
+            height: 300px;
+            margin: auto;
+            background-color:green;
+        }
+        #main.form{
+            width: 700px;
+            height: 250px;
+            margin: auto;
+        }
+        #main, #main.form, #main.form, h1 {
+            margin: auto;
+        }
+        h1{
+            text-align:center;
+        }
+        #content{
+            display: flex;
+            padding:40px;
+	}
+        #left{
+            width:50%;
+        }
+        #right{
+            width:200px;
+            float:right;
+	    margin: 0 0 0 100px;
+        }
+	#buttons{
+	    margin:auto;
+            width: 110px;
+	}
+        #buttons.button, #buttons.input{
+            margin:0 auto;
+        }
+        #table.img{
+            height:10px;
+            width:10px;
+	}
+	#icons.img{
+	    height:10px;
+            width:10px;	
+	
+	}
+	body{
+	    color:white;
+	}
+ 
+
+
+
+    </style>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+</script>
+    <script type="text/javascript">
+        function checkInput(element){
+            var value = $(element.val());
+            //if (value!=null&&''!=value);
+        }
+
+        function formReset(){
+            document.getElementById("myform").reset();
+        }
+	
+	var dis = true;
+        function clearInput(){
+            // $(element).parent().parent().children().children('.input').val('');
+	    document.getElementById("street").value='';
+	    
+	    document.getElementById("city").value='';
+	    document.getElementById('stateOpt').selected = true;
+	    if (!dis){
+		document.getElementById("street").disabled = true;
+  	        document.getElementById("city").disabled = true;
+	        document.getElementById('state').disabled = true;
+		dis = false;
+	    }
+ 	}
+
+	function clearOpt(){
+	    clearInput();
+	    document.getElementById("more").innerHTML = '';
+	    document.getElementById('chart_div').innerHTML='';
+	    //document.getElementById('table').innerHTML='';
+
+    
+	}
+
+
+	function curButton(){
+	    clearInput();
+	    if (dis){
+	        document.getElementById("street").disabled = true;
+  	        document.getElementById("city").disabled = true;
+	        document.getElementById('state').disabled = true;
+		dis = false;
+	    }
+	    else{
+		document.getElementById("street").disabled = false;
+		document.getElementById("city").disabled = false;
+		document.getElementById('state').disabled = false;
+	    	dis = true;
+	    }
+        
+	}
+	function curLoc(){
+	    var url="http://ip-api.com/json";
+	    var req=window.ActiveXObject?new ActiveXObject("Microsoft.XMLHTTP"):new XMLHttpRequest();
+	    req.open("GET",url,false);
+	    req.send(null);
+	    eval( ' var data='+ req.responseText);
+	    //data = data.parseJSON();
+	    //data = JSON.parse(data);
+	    //alert(data);
+	    //alert(data.lat);
+	    var lat = data.lat;
+	    var lng = data.lon;
+	    var city = data.city;
+            var tempf = document.createElement("form");
+            tempf.name="cur";
+            tempf.value="cur";
+            tempf.action = "weather.php";
+            tempf.method = "post";
+            tempf.type = "submit";
+            tempf.style.display = "none";
+	    //var str = "cur";
+            var arr = { "cur": "cur","lat":lat, "lng":lng,"sub" :"sub","city":city};
+            for (var x in arr){
+                var o = document.createElement("textarea");
+                o.name = x;
+                o.value = arr[x];   
+                tempf.appendChild(o);
+            }
+            document.body.appendChild(tempf);
+            tempf.submit();
+	    return tempf;
+
+	    
+	}
+	function detail(time,lat,lng,grap,chec,timezone){
+		var tmp = document.createElement("form");
+		tmp.name="tmp";
+		tmp.value="tmp";
+		tmp.action = "weather.php";
+		tmp.method = "post";
+		tmp.type = "submit";
+		tmp.style.display = "none";
+		//setCookie('timezone',timezone,100);
+		//alert(getCookie('timezone'));
+		var chec = (document.getElementById('checkbox').checked)? 'chec':'unchec'; 
+		var arr = {"tmp":'tmp',"time":time, "lat":lat, "lng":lng,"grap":grap,"chec":chec,"city":document.getElementById("city").value,"street":document.getElementById("street").value,"state":document.getElementById("state").value,"timezone":timezone};
+		for (var x in arr){
+		    var o = document.createElement("textarea");
+		    o.name = x;
+		    o.value = arr[x];	
+		    tmp.appendChild(o);
+		}
+		document.body.appendChild(tmp);
+		tmp.submit();
+		//return tmp;
+
+	    	}	
+/*
+function drawCurveTypes(arr) {
+	
+google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(t);
+	function t(){
+      var data = new google.visualization.DataTable();
+      data.addColumn('number', 'X');
+      data.addColumn('number', 'T');
+	data.addRows(arr);
+      var options = {
+        hAxis: {
+          title: 'Time'
+        },
+        vAxis: {
+          title: 'Temperature'
+        },
+        series: {
+          1: {curveType: 'function'}
+        }
+      };
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+}
+    }
+*/
+
+
+function drawCurveTypes(arr) {
+	
+google.charts.load('current', {packages: ['corechart','line']});
+google.charts.setOnLoadCallback(t);
+	function t(){
+      var data = new google.visualization.DataTable();
+      data.addColumn('number', 'X');
+      data.addColumn('number', 'T');
+	data.addRows(arr);
+	var options = {
+        //  title: 'Time',
+         // curveType: 'function',
+        //  legend: { position: 'bottom' };
+	//vAxis.textStyle.color:'white',
+	hAxis: {
+          title: 'Time'
+        },
+        vAxis: {
+          title: 'Temperature',
+	  textStyle:{color:'white'}
+	  //viewWindow:''
+        }
+	//series: {
+        //  1: {curveType: 'function'}
+        //}
+	
+        };
+      
+
+      var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+	}
+}
+    
+	
+function setCookie(name,value,expect)
+{
+	if(!(document.cookie || navigator.cookieEnabled))
+	{
+		console.log('please open cookie');
+	} 
+
+	var d = new Date();
+	d.setTime(d.getTime()+(expect*1000));
+	var expires = "expires="+d.toGMTString();
+	document.cookie = name+"="+value+"; "+expires;
+}
+
+function getCookie(name)
+{
+    var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+ 
+    if(arr=document.cookie.match(reg))
+ 
+        return unescape(arr[2]);
+    else
+    return null;
+}
+
+
+
+
+
+   </script>
+
+</HEAD>
+<body>
+
+<div id="main" style='border-radius:15px;'>
+    <h1>Weather Search</h1>
+
+<form action="weather.php" method="post" id="myform">
+    <div id="content">
+    <div id="left">
+        <div style='display:flex'><p style='width:40px;height:20px;line-height:20px;padding:0px;margin:0'>Street</p> <input id='street' style='height:20px;width:100px;padding:0px;position:relative;left:10px;border-radius:0' type="text" name="street" value="<?php echo $_POST['street'];?>"><br><br></div>
+        <div style='display:flex;padding:3 0 0 0; '><p style='width:40px;height:20px;line-height:20px;padding:0px;margin:0'>City </p><input id='city' style='height:20px;width:100px;padding:0px;position:relative;left:10px;border-radius:0px'type="text" name="city" value="<?php echo $_POST['city'];?>" ><br></div>
+	
+        <div style='display:flex;padding:10 0 10 0;'><p style='width:40px;height:20px;line-height:20px;padding:0px;margin:0'>State </p><select id='state' name="state" value="State"size="1" style='width:200px;' required></div>
+	 <option id='stateOpt' value="State">State</option>
+         <option value="">.........................</option>
+            <?php 
+	$html = '';
+	$str = "http://csci571.com/hw/hw6/States.txt";
+	$str = preg_replace("/ /","%20",$str);
+	$json = file_get_contents($str);
+	$arr = json_decode($json,TRUE);
+	$sta = $arr["States"];
+	for ($i = 0; $i <sizeof($sta);$i++){
+		$html.= "<option";
+		if (isset($_POST['chec']) && $_POST['chec']!='chec' && $_POST['state']==$sta[$i]['State']) $html.=" selected='selected' ";
+		elseif (isset($_POST['state']) && $_POST['state']==$sta[$i]['State']) $html.=" selected='selected' ";
+		$html.=" value='".$sta[$i]['State']."'>".$sta[$i]['State']."</option>";
+	    }
+	echo $html;
+	?>        </select>
+        <br>
+   </div>
+</div>
+    <div style='height:100;width:1; background-color:white'></div>
+   <div id="right"style='float:right'>
+        <input  id='checkbox' type="checkbox" name="checkbox" value="checkbox" onchange='curButton()'>Current Location
+   </div> 
+   </div>
+   <div id="buttons" style='position:relative;margin:0 0 0 230;display:flex'>
+        <input type="submit" name="sub" value="search">
+        <button type="button" onclick="clearOpt();">clear</button>
+   </div>
+ 
+</form>
+<div id="show">
+
+</div>
+
+</div>
+
+<?php
+
+    $STREET = '';
+    $CITY = '';
+    $STATE = '';
+    $weather_key = "e9853d8c6612ebcd301961d8e1f1d7e2";
+
+    if (isset($_POST["cur"])){echo("<script type=text/javascript> document.getElementById('checkbox').checked = true;curButton(); </script>");}
+    if(isset($_POST['chec']) && $_POST['chec']=='chec'){echo("<script type=text/javascript> document.getElementById('checkbox').checked = true;curButton(); </script>");}
+
+    if(isset($_POST['sub'])){
+
+	    if ((isset($_POST['checkbox']))&& $_POST['checkbox']=='checkbox'){
+#            $str = "http://ip-api.com/json";
+#            $json = file_get_contents($str);
+#            $arr = json_decode($json,TRUE);
+#            $lat = $arr['lat'];
+#            $lon = $arr['lon'];
+		    $_POST['checkbox'] = 'no';
+		   # echo("111111111111");
+		    echo("<script type=text/javascript> curLoc();</script>");
+	    }
+	    else {
+		if (isset($_POST["cur"])){
+		    #echo"111";
+		    $lat = $_POST["lat"];
+		    $lng = $_POST["lng"];
+		    $CITY = $_POST["city"];	
+	
+	    	}
+	    	else {
+		    #echo (333);
+		    $STREET = $_POST["street"];
+		    $CITY = $_POST["city"];
+		    $STATE = $_POST["state"];
+		    $str = ("https://maps.googleapis.com/maps/api/geocode/xml?address=".$STREET.','.$CITY.','.$STATE."&key=AIzaSyDE76Q5ZPNUC6VYBdBhd6cl4-xt6DcYDts");
+			    
+		    $str = preg_replace("/ /", "%20", $str);
+		    $geo= file_get_contents($str);
+		//error_log($geo);
+		    $xml = simplexml_load_string($geo);
+		//error_log($xml);
+		    if ($CITY=='' || $STREET==''|| $geo==null||($xml->status) != 'OK'){  
+			echo"<table border='1' style='border-collapse:collapse;color:black;background-color:lightgray;margin:0 auto'><tr><td>Please check the input address.</td></tr></table>";
+			$CITY='';
+			exit();
+		    }
+		    else{
+
+			$lat =  $xml->result[0]->geometry->location->lat;
+		        $lng =  $xml->result[0]->geometry->location->lng;
+#echo $doc;
+#$lat = $geocode->results[0]->geometry->location->lat;
+#$lng = $geocode->results[0]->geometry->location->lng;
+			}
+	    	}
+	    //echo ($lat.$lng);
+	    if (isset($_POST['cur']) && $_POST['cur']!='cur' && ($STREET==''||$CITY=='')){
+	        echo"<table border='1' style='border-collapse:collapse;color:black;background-color:lightgray;margin:0 auto'><tr><td>Please check the input address.</td></tr></table>";
+	    }
+	    else{
+	    #echo "<p>".$lat.",".$lng."</p>";
+	    $str = "https://api.forecast.io/forecast/e9853d8c6612ebcd301961d8e1f1d7e2/".$lat.','.$lng."?exclude=minutely,hourly,alerts,flags";
+	    
+	    $str = preg_replace("/ /","%20",$str);
+	    $json = file_get_contents($str);
+	    $arr = json_decode($json,TRUE);
+	    $timezone = $arr["timezone"];
+	    $cur = $arr["currently"];
+	    $temperature = $cur["temperature"];
+	    $summary = $cur["summary"];
+	    $humidity = $cur["humidity"];
+	    $pressure = $cur["pressure"];
+	    $windSpeed = $cur["windSpeed"];
+	    $visibility = $cur["visibility"];
+	    $cloudCover = $cur["cloudCover"];
+	    $ozone = $cur["ozone"];
+
+	    $html = "<div id='more'><div id='weather'  align='left' border='0px' style='color: #FFFFFF;width:430px; height:320px ;background-color:#66CCFF; margin:20 auto;padding:10px; border-radius:15px;'>";
+	    $html .= "<p style='font-size:40px;padding:0;margin:0;'>".$CITY."</p>";
+	    $html .= "<p>".$timezone."</p>";
+	    $html .= "<p1 style='font-size:70px'>".$temperature."</p1><img src='https://cdn3.iconfinder.com/data/icons/virtual-notebook/16/button_shape_oval-512.png' width='10px' height='10px' style='position:relative;top:-50px'> <span style='font-size:40px'>F</span><br/>";
+	    $html .= "<p2 style='font-size:50px;font-weight:bold;'>".$summary."</p2><br/>";
+	    if ($humidity!='') $html .= "<div id='icons' style='align:center;margin:0 auto'>  <img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-16-512.png' title='humidity' width='35px' height='35px' style='margin:0 14'>";
+	    if ($pressure!='')$html.=	"<img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-25-512.png' title='pressure' width='35px' height='35px'style='margin:0 14'>";
+	 if ($windSpeed!='')$html.="<img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-27-512.png' title='windSpeed'  width='35px' height='35px'style='margin:0 14'>";
+	 if ($visibility!='')$html.="<img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-30-512.png' title='visibility' width='35px' height='35px'style='margin:0 14'>";
+	 if ($cloudCover!='')$html.="<img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-28-512.png' title='cloudCover' width='35px' height='35px'style='margin:0 14'>";
+	 if ($ozone!='')$html.="<img src='https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-24-512.png' title='ozone' width='35px' height='35px'style='margin:0 14'>";
+	    $html .="</div>";
+	    $html .= "<div id='info' style='align:center;margin:0 auto;display:flex;'>    ";
+	if ($humidity!='') $html.= "<p style='width:35px;aligh:center;font-size:20px; margin:0 15 0 10'>".$humidity."</p>";
+	if ($pressure!='') $html.= "<p style='width:35px;aligh:center;font-size:20px; margin:0 15 0 10'>".$pressure."</p>";
+	if ($windSpeed!='') $html.= "<p style='width:35px;aligh:center;font-size:20px; margin:0 10 0 30'>".$windSpeed."</p>";
+	if ($visibility!='')	$html.= "<p style='width:35px;aligh:center;font-size:20px; margin:0 20'>".$visibility."</p>";
+	if ($cloudCover!='') $html.= "<p style='width:35px;aligh:center;font-size:20px; margin:0 20'>".$cloudCover."</p>";
+	if ($ozone!='') $html.= "<p style='width:35px;aligh:center;font-size:20px; margin:0 20 0 10'>".$ozone."</div>";
+	    $html .="</div>";
+
+#$doc = new DOMDocument();
+#$doc->getElementById("show")->innerHTML = $html;
+#$html .="<script type='text/javascript' document.getElementById('show').innerHTML = ".$html."     </script>  ";
+
+	    $dic = array(
+			    "clear-day"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-12-512.png",
+			    "rain"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-04-512.png",
+			    "snow"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-19-512.png",
+			    "sleet"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-07-512.png",
+			    "wind"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-27-512.png",
+			    "fog"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-28-512.png",
+			    "cloudy"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-01-512.png",
+			    "partly-cloudy-day"=>"https://cdn2.iconfinder.com/data/icons/weather-74/24/weather-02-512.png"
+			);
+
+	    $daily = $arr["daily"]["data"];
+	    $html .= "<table border='1 solid blue' align='center'style='color:white; width:800px;background-color:lightblue;margin:auto;padding:10px;border-collapse:collapse;' >";
+	    $html .= "<tr><td>Date</td><td>Status</td><td>Summary</td><td>TemperatureHigh</td><td>TemperatureLow</td><td>WindSpeed</td></tr>";
+	    for ($i=0;$i<sizeof($daily);$i++){
+		    $html .= "<tr><td align='center'>".date('Y-m-d',$daily[$i]["time"])."</td><td align='center'><img src='".$dic[$daily[$i]["icon"]]."' width='20px'height='20px' > </td><td align='center' onclick='detail(".$daily[$i]["time"].','.$lat.','.$lng.",\"no\",\"chec\",\"".$timezone."\");'>".$daily[$i]["summary"]."</td><td align='center'>".$daily[$i]["temperatureHigh"]."</td><td align='center'>".$daily[$i]["temperatureLow"]."</td><td align='center'>".$daily[$i]["windSpeed"]."</td></tr>";
+	    }
+
+	    $html .= "</table></div>";
+	    echo $html;
+	    }
+    }
+}
+elseif (isset($_POST['tmp'])){ 
+
+	#echo $_POST["time"];
+	$str = "https://api.darksky.net/forecast/e9853d8c6612ebcd301961d8e1f1d7e2/".$_POST["lat"].','.$_POST["lng"].','.$_POST["time"]."?exclude=minutely";
+	$str = preg_replace("/ /","%20",$str);
+	$json = file_get_contents($str);
+	$arr = json_decode($json,TRUE);
+	$cur = $arr["currently"];
+	$summary = $cur["summary"];
+	$temperature =(int) $cur["temperature"];
+	$timez=$_POST['timezone'];
+	//error_log($timez);
+	$dic = array(
+			"clear-day"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/sun-512.png",
+			"clear-night"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/sun-512.png",
+			"rain"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/rain-512.png",
+			"snow"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/snow-512.png",
+			"sleet"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/lightning-512.png",
+			"wind"=>"https://cdn4.iconfinder.com/data/icons/the-weather-is-nice-today/64/weather_10-512.png",
+			"fog"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/cloudy-512.png",
+			"cloudy"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/cloud-512.png",
+			"partly-cloudy-day"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/sunny-512.png",
+			"partly-cloudy-night"=>"https://cdn3.iconfinder.com/data/icons/weather-344/142/sunny-512.png"
+		    );
+
+	$html = "";
+	$html .= "<div id='more'><p style='font-size:40px;padding:0;margin:0 auto;text-align:center;color:black'>Daily Weather Detail</p>";
+
+	$html .= "<div id='detail' align='left' border='0px'style='color: #FFFFFF;width:500px; height:400px ;background-color:#66CCFF; margin:auto;padding:10px; border-radius:15px;'>";
+	$html .="<div style='width:400px; height:200px;; float:center;display:flex;position:relative;left:30px;'>";
+	$html .= "<div style='width:260px;position:relative;left:10px;top:70px'><p2 style='font-size:20px;font-weight:bold;'>".$summary."</p2><br/>";
+	$html .= "<p1 style='font-size:70px;fot-weight:bold'>".$temperature."</p1><img src='https://cdn3.iconfinder.com/data/icons/virtual-notebook/16/button_shape_oval-512.png' width='10px' height='10px' style='position:relative;top:-50px'> <span style='font-size:40px'>F</span></div>";
+	$html .= "<div style='width:170px'><img src='".$dic[$cur["icon"]]."' width='200px'height='200px' ><br/></div>";
+	$html .="</div>";
+	$tmp = $cur["precipIntensity"];
+	$precipIntensity = ($tmp <= 0.001 ? "None": ($tmp <= 0.015 ? "Very Light": ($tmp <= 0.05 ? "Light": ($tmp <= 0.1 ? "Moderate": "heavy")))); 
+	$rainChance = 100 * (float) $cur["precipProbability"];
+	//echo $cur["precipProbability"];
+	$windSpeed = (float)$cur["windSpeed"];
+	$humidity = 100 * (float)$cur["humidity"];
+	$visibility = $cur["visibility"];
+	$sunrise = $arr["daily"]["data"][0]["sunriseTime"];
+	$sunset = $arr["daily"]["data"][0]["sunsetTime"];
+
+	$html .="<div style='position:relative;left:40%;width:390px;line-height:2px;'>";
+	$html .="<p style='font-size:23px'>Percipitation:<span style='font-size:30px;'> ".$precipIntensity."</span></p>";
+	$html .="<p style='font-size:23px'>Chance of Rain:<span style='font-size:30px;'> ".$rainChance."</span>%</p>";
+	$html .="<p style='font-size:23px'>Wind Speed:<span style='font-size:30px;'> ".$windSpeed."</span>mph</p>";
+	$html .="<p style='font-size:23px'>Humidity:<span style='font-size:30px;'> ".$humidity."</span>%</p>";
+	$html .="<p style='font-size:23px'>Visibility:<span style='font-size:30px;'> ".$visibility."</span>ml</p>";
+	$m = 'AM';
+
+	function transtime($time,$timez){
+	//	date_default_timezone_set('America/Los_Angeles');
+	        date_default_timezone_set($timez);
+		//error_log($timez);
+		$h = (float)date("H:I",$time);
+		if ($h > 12){
+			$h -= 12;
+			$m = 'PM';
+		}
+		else{
+			$m = 'AM';
+		}
+		#$h = (((float)$h) > 12) ? (((float)$h - 12) . "PM") : ($h . "AM");
+		return $h;
+	}	
+	#echo "         ".$sunrise;
+	#echo "           ".transtime($sunrise);
+	//echo(	$timez);
+	$html .="<p style='font-size:23px'>Sunrise/Sunset:<span style='font-size:30px;'> ".transtime($sunrise,$timez)."<span style='font-size:20px'>".$m."/</span>".transtime($sunset,$timez)."<span style='font-size:20px'>".$m."</span>"."</span></p>";
+#$html .="<p style='font-size:23px'>Percipitation:<span style='font-size:30px;'> ".$precipIntensity."</span></p>";
+
+	$html .="</div>";
+	$html .="</div>";
+	$html .= "<p style='font-size:40px;padding:0;margin:0 auto;text-align:center'>Day's Hourly Weather</p>";
+	if($_POST["grap"]=='no'){
+	    #echo (111);
+	    $html .="<div style='text-align:center;'><img src='http://csci571.com/hw/hw6/images/arrow_up.png' style='text-align:center;width:30px;height:10px;'onclick='detail(".$_POST["time"].','.$_POST['lat'].','.$_POST['lng'].",\"yes\",\"chec\",\"".$timez."\");'></div>";
+	    
+	echo $html;
+	}
+	else{
+	    $html .="<div style='text-align:center;'><img src='http://csci571.com/hw/hw6/images/arrow_down.png' style='text-align:center;width:30px;height:10px;'onclick='detail(".$_POST["time"].','.$_POST['lat'].','.$_POST['lng'].",\"no\",\"chec\",\"".$timez."\");'></div>";
+	    $tempArr = array();
+	    $hourly = $arr["hourly"]["data"];
+	    for ($i = 0; $i <sizeof($hourly);$i++){
+		$tempArr[$i]=array($i,$hourly[$i]["temperature"]);
+	    }
+	$html.="</div>";
+	echo $html;
+        echo ("<div style='margin:0 auto;padding:0;width:900px'><div id='chart_div' style='width: 900px; height: 200px'></div></div>");
+	echo("<script type=text/javascript> drawCurveTypes(");
+	
+	print_r(json_encode($tempArr));
+	echo(");</script>");
+	    
+	}
+
+}
+
+
+
+
+?>
+
+
+
+</body>
+
+
+
+</HTML>
